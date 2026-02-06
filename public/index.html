@@ -45,56 +45,46 @@
 </head>
 <body>
     <h1>职位列表</h1>
-    <div class="job-list" id="jobList"></div>
+    <div class="job-list" id="jobList">正在加载...</div>
 
     <script>
-        // 模拟数据库数据
-        const jobs = [
-            {
-                Title: "前端工程师",
-                Company: "某 SaaS 公司",
-                Region: "China",
-                Role: "Dev",
-                Paid: true,
-                URL: "https://example.com",
-                Status: "Published"
-            },
-            {
-                Title: "后端工程师",
-                Company: "另一家科技公司",
-                Region: "China",
-                Role: "Dev",
-                Paid: false,
-                URL: "https://example2.com",
-                Status: "Draft"
-            },
-            {
-                Title: "UI/UX 设计师",
-                Company: "设计公司",
-                Region: "China",
-                Role: "Design",
-                Paid: true,
-                URL: "https://example3.com",
-                Status: "Published"
-            }
-        ];
+        // 你的后端 API 地址
+        const apiURL = 'https://your-api.example.com/jobs';
 
         const jobList = document.getElementById('jobList');
 
-        jobs.forEach(job => {
-            const card = document.createElement('div');
-            card.className = 'job-card';
-            card.innerHTML = `
-                <h2>${job.Title}</h2>
-                <p><strong>公司：</strong>${job.Company}</p>
-                <p><strong>地区：</strong>${job.Region}</p>
-                <p><strong>角色：</strong>${job.Role}</p>
-                <p><strong>是否付费：</strong>${job.Paid ? '✅' : '❌'}</p>
-                <p><strong>状态：</strong>${job.Status}</p>
-                <a href="${job.URL}" target="_blank">查看详情</a>
-            `;
-            jobList.appendChild(card);
-        });
+        async function fetchJobs() {
+            try {
+                const response = await fetch(apiURL);
+                if (!response.ok) throw new Error('网络错误');
+                const jobs = await response.json();
+
+                // 清空 loading 文本
+                jobList.innerHTML = '';
+
+                // 遍历职位数据生成卡片
+                jobs.forEach(job => {
+                    const card = document.createElement('div');
+                    card.className = 'job-card';
+                    card.innerHTML = `
+                        <h2>${job.Title}</h2>
+                        <p><strong>公司：</strong>${job.Company}</p>
+                        <p><strong>地区：</strong>${job.Region}</p>
+                        <p><strong>角色：</strong>${job.Role}</p>
+                        <p><strong>是否付费：</strong>${job.Paid ? '✅' : '❌'}</p>
+                        <p><strong>状态：</strong>${job.Status}</p>
+                        <a href="${job.URL}" target="_blank">查看详情</a>
+                    `;
+                    jobList.appendChild(card);
+                });
+
+            } catch (error) {
+                jobList.innerHTML = `<p style="color:red;">加载职位失败: ${error.message}</p>`;
+            }
+        }
+
+        // 页面加载后立即获取职位
+        window.addEventListener('DOMContentLoaded', fetchJobs);
     </script>
 </body>
 </html>
