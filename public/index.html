@@ -1,49 +1,89 @@
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-  const jobList = document.getElementById('jobList')
-  const regionFilter = document.getElementById('regionFilter')
-  const roleFilter = document.getElementById('roleFilter')
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <title>Digital Nomad</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+</head>
+<body>
+  <h1>Digital Nomad Jobs</h1>
 
-  if (!jobList) {
-    console.error('jobList 元素不存在')
-    return
-  }
+  <!-- 👇 筛选器（缺了这个，你的 JS 一定炸） -->
+  <div>
+    <select id="regionFilter">
+      <option value="all">全部地区</option>
+      <option value="remote">Remote</option>
+      <option value="asia">Asia</option>
+      <option value="europe">Europe</option>
+    </select>
 
-  let jobs = []
+    <select id="roleFilter">
+      <option value="all">全部角色</option>
+      <option value="frontend">Frontend</option>
+      <option value="backend">Backend</option>
+    </select>
+  </div>
 
-  async function loadJobs() {
-    try {
-      const res = await fetch('/api/jobs')
-      const data = await res.json()
+  <!-- 👇 列表容器（缺了这个，renderJobs 直接崩） -->
+  <div id="jobList"></div>
 
-      if (!Array.isArray(data)) {
-        console.error('API 返回不是数组', data)
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const jobList = document.getElementById('jobList')
+      const regionFilter = document.getElementById('regionFilter')
+      const roleFilter = document.getElementById('roleFilter')
+
+      if (!jobList) {
+        document.body.innerHTML += '<p>❌ jobList 不存在</p>'
         return
       }
 
-      jobs = data
-      renderJobs()
-    } catch (err) {
-      console.error('加载 jobs 失败', err)
-    }
-  }
+      let jobs = []
 
-  function renderJobs() {
-    jobList.innerHTML = ''
+      async function loadJobs() {
+        try {
+          const res = await fetch('/api/jobs')
+          const data = await res.json()
 
-    jobs
-      .filter(j =>
-        (!regionFilter || regionFilter.value === 'all' || j.region === regionFilter.value) &&
-        (!roleFilter || roleFilter.value === 'all' || j.role === roleFilter.value)
-      )
-      .forEach(j => {
-        const div = document.createElement('div')
-        div.className = 'bg-white rounded-xl shadow p-5'
-        div.innerHTML = `
-          <h4 class="font-semibold">
-            ${j.title || 'Untitled'} ${j.paid ? '⭐' : ''}
-          </h4>
-          <p class="text-sm text-gray-500">${j.company || ''}</p>
-          ${
-            j.url
-              ? `<a href="
+          if (!Array.isArray(data)) {
+            document.body.innerHTML += '<p>❌ API 返回不是数组</p>'
+            console.error(data)
+            return
+          }
+
+          jobs = data
+          renderJobs()
+        } catch (err) {
+          document.body.innerHTML += '<p>❌ 加载 jobs 失败</p>'
+          console.error(err)
+        }
+      }
+
+      function renderJobs() {
+        jobList.innerHTML = ''
+
+        jobs
+          .filter(j =>
+            (regionFilter.value === 'all' || j.region === regionFilter.value) &&
+            (roleFilter.value === 'all' || j.role === roleFilter.value)
+          )
+          .forEach(j => {
+            const div = document.createElement('div')
+            div.style.border = '1px solid #ccc'
+            div.style.margin = '8px 0'
+            div.style.padding = '8px'
+            div.innerHTML = `
+              <strong>${j.title}</strong> @ ${j.company}
+              ${j.paid ? '⭐' : ''}
+              <a href="${j.url}" target="_blank">查看</a>
+            `
+            jobList.appendChild(div)
+          })
+      }
+
+      regionFilter.onchange = roleFilter.onchange = renderJobs
+      loadJobs()
+    })
+  </script>
+</body>
+</html>
