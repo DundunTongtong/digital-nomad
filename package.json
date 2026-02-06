@@ -1,0 +1,11 @@
+{
+  "name": "digital-nomad",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vercel dev",
+    "start": "vercel dev",
+    "build": "echo '静态项目，无需构建'"
+  },
+  "dependencies": {}
+}
