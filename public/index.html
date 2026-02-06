@@ -1,50 +1,31 @@
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-  const jobList = document.getElementById('jobList')
-  const regionFilter = document.getElementById('regionFilter')
-  const roleFilter = document.getElementById('roleFilter')
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>测试 Jobs</title>
+</head>
+<body>
+  <h1>Digital Nomad Jobs</h1>
+  <div id="jobList"></div>
 
-  // 如果关键 DOM 不存在，直接停止（不白屏）
-  if (!jobList) {
-    console.error('jobList 不存在')
-    return
-  }
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const jobList = document.getElementById('jobList')
+      if (!jobList) return
 
-  let jobs = []
+      // 测试数据
+      const jobs = [
+        { title: 'Frontend', company: 'Remote Inc', paid: true, url: 'https://example.com' },
+        { title: 'Backend', company: 'Tech Corp', paid: false, url: 'https://example.com' }
+      ]
 
-  async function loadJobs() {
-    try {
-      const res = await fetch('/api/jobs')
-      const data = await res.json()
-
-      // API 返回兜底
-      if (!Array.isArray(data)) {
-        console.error('API 返回不是数组', data)
-        return
-      }
-
-      jobs = data
-      renderJobs()
-    } catch (err) {
-      console.error('加载 jobs 失败', err)
-    }
-  }
-
-  function renderJobs() {
-    jobList.innerHTML = ''
-
-    jobs
-      .filter(j =>
-        // 筛选器不存在时自动放行
-        (!regionFilter || regionFilter.value === 'all' || j.region === regionFilter.value) &&
-        (!roleFilter || roleFilter.value === 'all' || j.role === roleFilter.value)
-      )
-      .forEach(j => {
+      jobs.forEach(j => {
         const div = document.createElement('div')
-        div.className = 'bg-white rounded-xl shadow p-5'
-        div.innerHTML = `
-          <h4 class="font-semibold">
-            ${j.title || 'Untitled'} ${j.paid ? '⭐' : ''}
-          </h4>
-          <p class="text-sm text-gray-500">${j.company || ''}</p>
-          ${
+        div.innerHTML = `<strong>${j.title}</strong> @ ${j.company} ${j.paid ? '⭐' : ''}
+          <a href="${j.url}" target="_blank">查看</a>`
+        jobList.appendChild(div)
+      })
+    })
+  </script>
+</body>
+</html>
