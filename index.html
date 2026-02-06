@@ -529,8 +529,8 @@ const roleFilter = document.getElementById('roleFilter')</body></script><p><span
 <span>  jobList.innerHTML = &#39;&#39;</span>
 <span>  jobs</span>
 <span>    .filter(j =&gt;</span>
-<span>      (regionFilter.value </span><mark><span>= &#39;all&#39; || j.region =</span></mark><span> regionFilter.value) &amp;&amp;</span>
-<span>      (roleFilter.value </span><mark><span>= &#39;all&#39; || j.role =</span></mark><span> roleFilter.value)</span>
+<span>      (regionFilter.value </span><mark><span>== &#39;all&#39; || j.region ==</span></mark><span> regionFilter.value) &amp;&amp;</span>
+<span>      (roleFilter.value </span><mark><span>== &#39;all&#39; || j.role ==</span></mark><span> roleFilter.value)</span>
 <span>    )</span>
 <span>    .forEach(j =&gt; {</span>
 <span>      const div = document.createElement(&#39;div&#39;)</span>
