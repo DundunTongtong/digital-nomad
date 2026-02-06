@@ -1,48 +1,39 @@
-<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-  <meta charset="UTF-8" />
-  <title>Digital Nomad</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-</head>
-<body>
-  <h1>Digital Nomad Jobs</h1>
+<script>
+const jobList = document.getElementById('jobList')
+const regionFilter = document.getElementById('regionFilter')
+const roleFilter = document.getElementById('roleFilter')
 
-  <div id="status">加载中…</div>
-  <ul id="jobList"></ul>
+let jobs = []
 
-  <script>
-    document.addEventListener('DOMContentLoaded', async () => {
-      const status = document.getElementById('status')
-      const jobList = document.getElementById('jobList')
+async function loadJobs() {
+  const res = await fetch('/api/jobs')
+  jobs = await res.json()
+  renderJobs()
+}
 
-      try {
-        const res = await fetch('/api/jobs')
-        const data = await res.json()
-
-        if (!Array.isArray(data)) {
-          status.textContent = 'API 返回格式错误'
-          console.error(data)
-          return
-        }
-
-        status.textContent = `加载成功，共 ${data.length} 条`
-
-        data.forEach(job => {
-          const li = document.createElement('li')
-          li.innerHTML = `
-            <strong>${job.title}</strong>
-            @ ${job.company}
-            ${job.paid ? '⭐' : ''}
-            <a href="${job.url}" target="_blank">查看</a>
-          `
-          jobList.appendChild(li)
-        })
-      } catch (err) {
-        status.textContent = '加载失败，请查看控制台'
-        console.error(err)
-      }
+function renderJobs() {
+  jobList.innerHTML = ''
+  jobs
+    .filter(j =>
+      (regionFilter.value === 'all' || j.region === regionFilter.value) &&
+      (roleFilter.value === 'all' || j.role === roleFilter.value)
+    )
+    .forEach(j => {
+      const div = document.createElement('div')
+      div.className = 'bg-white rounded-xl shadow p-5'
+      div.innerHTML = `
+        <h4 class="font-semibold">
+          ${j.title} ${j.paid ? '⭐' : ''}
+        </h4>
+        <p class="text-sm text-gray-500">${j.company}</p>
+        <a href="${j.url}" target="_blank" class="text-sm text-blue-600 mt-2 inline-block">
+          查看详情 →
+        </a>
+      `
+      jobList.appendChild(div)
     })
-  </script>
-</body>
-</html>
+}
+
+regionFilter.onchange = roleFilter.onchange = renderJobs
+loadJobs()
+</script>
