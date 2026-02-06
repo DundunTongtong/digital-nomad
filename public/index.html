@@ -1,39 +1,59 @@
 <script>
-const jobList = document.getElementById('jobList')
-const regionFilter = document.getElementById('regionFilter')
-const roleFilter = document.getElementById('roleFilter')
+document.addEventListener('DOMContentLoaded', () => {
+  const jobList = document.getElementById('jobList')
+  const regionFilter = document.getElementById('regionFilter')
+  const roleFilter = document.getElementById('roleFilter')
 
-let jobs = []
+  if (!jobList) {
+    console.error('jobList 元素不存在')
+    return
+  }
 
-async function loadJobs() {
-  const res = await fetch('/api/jobs')
-  jobs = await res.json()
-  renderJobs()
-}
+  let jobs = []
 
-function renderJobs() {
-  jobList.innerHTML = ''
-  jobs
-    .filter(j =>
-      (regionFilter.value === 'all' || j.region === regionFilter.value) &&
-      (roleFilter.value === 'all' || j.role === roleFilter.value)
-    )
-    .forEach(j => {
-      const div = document.createElement('div')
-      div.className = 'bg-white rounded-xl shadow p-5'
-      div.innerHTML = `
-        <h4 class="font-semibold">
-          ${j.title} ${j.paid ? '⭐' : ''}
-        </h4>
-        <p class="text-sm text-gray-500">${j.company}</p>
-        <a href="${j.url}" target="_blank" class="text-sm text-blue-600 mt-2 inline-block">
-          查看详情 →
-        </a>
-      `
-      jobList.appendChild(div)
-    })
-}
+  async function loadJobs() {
+    try {
+      const res = await fetch('/api/jobs')
+      const data = await res.json()
 
-regionFilter.onchange = roleFilter.onchange = renderJobs
-loadJobs()
+      if (!Array.isArray(data)) {
+        console.error('API 返回不是数组', data)
+        return
+      }
+
+      jobs = data
+      renderJobs()
+    } catch (err) {
+      console.error('加载 jobs 失败', err)
+    }
+  }
+
+  function renderJobs() {
+    jobList.innerHTML = ''
+
+    jobs
+      .filter(j =>
+        (!regionFilter || regionFilter.value === 'all' || j.region === regionFilter.value) &&
+        (!roleFilter || roleFilter.value === 'all' || j.role === roleFilter.value)
+      )
+      .forEach(j => {
+        const div = document.createElement('div')
+        div.className = 'bg-white rounded-xl shadow p-5'
+        div.innerHTML = `
+          <h4 class="font-semibold">
+            ${j.title || 'Untitled'} ${j.paid ? '⭐' : ''}
+          </h4>
+          <p class="text-sm text-gray-500">${j.company || ''}</p>
+          ${j.url ? `<a href="${j.url}" target="_blank" class="text-sm text-blue-600 mt-2 inline-block">查看详情 →</a>` : ''}
+        `
+        jobList.appendChild(div)
+      })
+  }
+
+  if (regionFilter && roleFilter) {
+    regionFilter.onchange = roleFilter.onchange = renderJobs
+  }
+
+  loadJobs()
+})
 </script>
