@@ -3,12 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>职位列表</title>
+    <title>Notion 职位列表</title>
     <style>
         body {
             font-family: Arial, sans-serif;
             background-color: #f5f5f5;
             padding: 20px;
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
         }
         .job-list {
             display: grid;
@@ -44,36 +48,48 @@
     </style>
 </head>
 <body>
-    <h1>职位列表</h1>
+    <h1>Notion 职位列表</h1>
     <div class="job-list" id="jobList">正在加载...</div>
 
     <script>
-        // 你的后端 API 地址
-        const apiURL = 'https://your-api.example.com/jobs';
+        // 假设你有一个后端代理 API 或直接获取 Notion 数据的 URL
+        const apiURL = 'https://www.notion.so/a7b6fb9b6d8e4b1b9304a625e7723f19?v=4ba3aa6717994410a81754881a506c5c&source=copy_link'; // 返回 JSON 的接口
 
         const jobList = document.getElementById('jobList');
 
         async function fetchJobs() {
             try {
                 const response = await fetch(apiURL);
-                if (!response.ok) throw new Error('网络错误');
-                const jobs = await response.json();
+                if (!response.ok) throw new Error('网络错误或接口异常');
+
+                const data = await response.json();
 
                 // 清空 loading 文本
                 jobList.innerHTML = '';
 
-                // 遍历职位数据生成卡片
-                jobs.forEach(job => {
+                // 遍历 Notion 数据生成职位卡片
+                // 注意：Notion 返回的数据结构通常是 { results: [...] }
+                data.results.forEach(page => {
+                    const properties = page.properties;
+
+                    const title = properties.Title?.title[0]?.plain_text || '未知职位';
+                    const company = properties.Company?.rich_text[0]?.plain_text || '未知公司';
+                    const region = properties.Region?.select?.name || '未知地区';
+                    const role = properties.Role?.select?.name || '未知角色';
+                    const paid = properties.Paid?.checkbox || false;
+                    const url = properties.URL?.url || '#';
+                    const status = properties.Status?.select?.name || '未知状态';
+
                     const card = document.createElement('div');
                     card.className = 'job-card';
                     card.innerHTML = `
-                        <h2>${job.Title}</h2>
-                        <p><strong>公司：</strong>${job.Company}</p>
-                        <p><strong>地区：</strong>${job.Region}</p>
-                        <p><strong>角色：</strong>${job.Role}</p>
-                        <p><strong>是否付费：</strong>${job.Paid ? '✅' : '❌'}</p>
-                        <p><strong>状态：</strong>${job.Status}</p>
-                        <a href="${job.URL}" target="_blank">查看详情</a>
+                        <h2>${title}</h2>
+                        <p><strong>公司：</strong>${company}</p>
+                        <p><strong>地区：</strong>${region}</p>
+                        <p><strong>角色：</strong>${role}</p>
+                        <p><strong>是否付费：</strong>${paid ? '✅' : '❌'}</p>
+                        <p><strong>状态：</strong>${status}</p>
+                        <a href="${url}" target="_blank">查看详情</a>
                     `;
                     jobList.appendChild(card);
                 });
@@ -83,7 +99,6 @@
             }
         }
 
-        // 页面加载后立即获取职位
         window.addEventListener('DOMContentLoaded', fetchJobs);
     </script>
 </body>
